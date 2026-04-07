@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import Uploader from './components/Uploader';
 import ResizeSettings from './components/ResizeSettings';
 import Preview from './components/Preview';
@@ -5,6 +6,14 @@ import Downloader from './components/Downloader';
 import Favorites from './components/Favorites';
 
 export default function App() {
+  const [sourceImage, setSourceImage] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const showToast = useCallback((message) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 3000);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -20,7 +29,11 @@ export default function App() {
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
         {/* 업로드 영역 */}
         <section>
-          <Uploader onUpload={() => {}} />
+          <Uploader
+            sourceImage={sourceImage}
+            onUpload={setSourceImage}
+            showToast={showToast}
+          />
         </section>
 
         {/* 설정 + 미리보기 2단 */}
@@ -39,6 +52,13 @@ export default function App() {
           <Favorites onApply={() => {}} />
         </section>
       </main>
+
+      {/* 전역 토스트 */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-2.5 rounded-lg shadow-lg z-50 pointer-events-none">
+          {toast}
+        </div>
+      )}
     </div>
   );
 }

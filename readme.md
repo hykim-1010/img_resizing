@@ -1,3 +1,16 @@
+# IMG Resizer
+
+## 실행 방법
+- 설치: npm install
+- 실행: npm run dev
+- 빌드: npm run build
+
+## 폴더 설명
+- a: 기존 운영 프로젝트
+- b: 신규 독립 프로젝트
+
+---
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

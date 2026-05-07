@@ -26,7 +26,7 @@ src/
 
 ## 커밋 메시지 규칙
 - 형식: `[Step N] type: 설명`
-- N은 CLAUDE.md 개발 진행 순서 기준으로 해당 작업이 속한 단계 번호
+- N은 AGENTS.md 개발 진행 순서 기준으로 해당 작업이 속한 단계 번호
 - 예시: `[Step 3] feat: useImageResize 훅 구현 (모드 ①②③)`
 
 ## 코딩 규칙
@@ -51,7 +51,7 @@ src/
 ### Step 1 — 프로젝트 초기화
 - React + Vite + Tailwind CSS 세팅
 - 프로젝트명: img-resizer
-- CLAUDE.md 기준 디렉토리 구조대로 빈 파일 생성
+- AGENTS.md 기준 디렉토리 구조대로 빈 파일 생성
 - App.jsx: Header + 전체 레이아웃 골격 (업로드 / 설정+미리보기 2단 / 즐겨찾기 순)
 - 불필요한 Vite 기본 파일 정리
 

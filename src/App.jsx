@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Uploader from './components/Uploader';
 import ResizeSettings from './components/ResizeSettings';
 import Preview from './components/Preview';
@@ -160,6 +160,8 @@ export default function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
   const [toast, setToast] = useState(null);
+  const [isUploaderExpanded, setIsUploaderExpanded] = useState(true);
+  const [settingsTab, setSettingsTab] = useState('direct');
 
   const toastTimerRef = useRef(null);
   const uploadedImagesRef = useRef([]);
@@ -246,7 +248,7 @@ export default function App() {
 
       if (validFiles.length === 0) {
         if (invalidCount > 0) {
-          showToast('지원하지 않는 파일 형식입니다.');
+          showToast('吏?먰븯吏 ?딅뒗 ?뚯씪 ?뺤떇?낅땲??');
         }
         return;
       }
@@ -266,10 +268,10 @@ export default function App() {
         setHasPendingChanges(true);
 
         if (invalidCount > 0) {
-          showToast(`지원하지 않는 파일 ${invalidCount}개는 제외했습니다.`);
+          showToast(`吏?먰븯吏 ?딅뒗 ?뚯씪 ${invalidCount}媛쒕뒗 ?쒖쇅?덉뒿?덈떎.`);
         }
       } catch {
-        showToast('이미지를 읽는 중 오류가 발생했습니다.');
+        showToast('?대?吏瑜??쎈뒗 以??ㅻ쪟媛 諛쒖깮?덉뒿?덈떎.');
       } finally {
         setIsProcessing(false);
       }
@@ -299,7 +301,7 @@ export default function App() {
       });
 
       if (shouldWarnPngLimit) {
-        showToast('PNG에서는 용량 제한을 보장하기 어렵습니다. JPG를 권장합니다.');
+        showToast('PNG?먯꽌???⑸웾 ?쒗븳??蹂댁옣?섍린 ?대졄?듬땲?? JPG瑜?沅뚯옣?⑸땲??');
       }
 
       setHasPendingChanges(true);
@@ -310,7 +312,7 @@ export default function App() {
   const applyPreview = useCallback(
     async (baseSettings) => {
       if (uploadedImages.length === 0) {
-        showToast('먼저 이미지를 업로드해 주세요.');
+        showToast('癒쇱? ?대?吏瑜??낅줈?쒗빐 二쇱꽭??');
         return;
       }
 
@@ -339,7 +341,7 @@ export default function App() {
         setActiveImageIndex((prev) => Math.min(prev, Math.max(0, uploadedImages.length - 1)));
 
         if (failCount > 0) {
-          showToast(`미리보기 생성 완료: 성공 ${nextResults.filter(Boolean).length}개, 실패 ${failCount}개`);
+          showToast(`Preview done: success ${nextResults.filter(Boolean).length}, failed ${failCount}`);
         }
       } finally {
         setIsProcessing(false);
@@ -368,7 +370,7 @@ export default function App() {
   const handleFavoriteAdd = useCallback(
     (favoriteInput) => {
       addFavorite(favoriteInput);
-      showToast('즐겨찾기를 저장했습니다.');
+      showToast('利먭꺼李얘린瑜???ν뻽?듬땲??');
     },
     [addFavorite, showToast],
   );
@@ -376,7 +378,7 @@ export default function App() {
   const handleFavoriteDelete = useCallback(
     (favoriteId) => {
       deleteFavorite(favoriteId);
-      showToast('즐겨찾기를 삭제했습니다.');
+      showToast('利먭꺼李얘린瑜???젣?덉뒿?덈떎.');
     },
     [deleteFavorite, showToast],
   );
@@ -389,22 +391,21 @@ export default function App() {
   );
 
   const handleFavoriteApply = useCallback(
-    (favorite) => {
+    async (favorite) => {
       if (!activeImage) {
         showToast('먼저 이미지를 업로드해 주세요.');
         return;
       }
 
       const nextSettings = buildSettingsFromFavorite(favorite, settings);
-
-      clearResults();
       setSettings(nextSettings);
       setAppliedSettings(null);
       setHasPendingChanges(true);
 
-      showToast('즐겨찾기 설정을 적용했습니다. 미리보기를 생성해 결과를 확인하세요.');
+      await applyPreview(nextSettings);
+      showToast('즐겨찾기 설정으로 미리보기를 생성했습니다.');
     },
-    [activeImage, clearResults, settings, showToast],
+    [activeImage, applyPreview, settings, showToast],
   );
 
   const handleDownload = useCallback(
@@ -466,6 +467,10 @@ export default function App() {
   }, [resultImages]);
 
   useEffect(() => {
+    setIsUploaderExpanded(uploadedImages.length === 0);
+  }, [uploadedImages.length]);
+
+  useEffect(() => {
     return () => {
       if (toastTimerRef.current) {
         clearTimeout(toastTimerRef.current);
@@ -477,35 +482,87 @@ export default function App() {
   }, [revokeResultImages, revokeUploadedImages]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b border-gray-200 bg-white px-6 py-4">
-        <div className="mx-auto max-w-5xl">
-          <h1 className="text-2xl font-bold text-gray-900">IMG Resizer</h1>
-          <p className="mt-1 text-sm text-gray-500">브라우저에서 바로 이미지를 리사이즈하고 최적화합니다.</p>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-5xl space-y-8 px-6 py-8">
-        <section>
-          <Uploader
-            uploadedImages={uploadedImages}
-            activeImageIndex={activeImageIndex}
-            isProcessing={isProcessing}
-            onUpload={handleFilesUpload}
-            onSelectIndex={setActiveImageIndex}
-          />
+    <div className="h-screen overflow-hidden bg-gray-50">
+      <main className="mx-auto flex h-full max-w-[1280px] flex-col gap-4 px-6 py-4">
+        <h1 className="shrink-0 text-2xl font-bold text-gray-900">IMG Resizer</h1>
+        <section className="shrink-0 rounded-xl border border-gray-200 bg-white shadow-sm">
+          <button
+            type="button"
+            onClick={() => setIsUploaderExpanded((prev) => !prev)}
+            className="flex w-full items-center justify-between px-4 py-3 text-left"
+          >
+            <div>
+              <p className="text-sm font-semibold text-gray-900">이미지 업로드</p>
+              <p className="text-xs text-gray-500">
+                {uploadedImages.length > 0 ? `${uploadedImages.length}개 업로드됨` : '이미지를 추가해 주세요'}
+              </p>
+            </div>
+            <span className="text-xs font-semibold text-blue-700">{isUploaderExpanded ? '접기' : '펼치기'}</span>
+          </button>
+          {isUploaderExpanded && (
+            <div className="border-t border-gray-200 p-4">
+              <Uploader
+                uploadedImages={uploadedImages}
+                activeImageIndex={activeImageIndex}
+                isProcessing={isProcessing}
+                onUpload={handleFilesUpload}
+                onSelectIndex={setActiveImageIndex}
+              />
+            </div>
+          )}
         </section>
+        <section className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-12">
+          <div className="space-y-4 overflow-y-auto pr-1 lg:col-span-4">
+            <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+              <h2 className="text-base font-semibold text-gray-900">리사이즈 설정 영역</h2>
+              <div className="mt-3 inline-flex rounded-md border border-gray-200 bg-gray-100 p-1">
+                <button
+                  type="button"
+                  onClick={() => setSettingsTab('direct')}
+                  className={[
+                    'rounded px-4 py-2 text-sm font-semibold transition-colors',
+                    settingsTab === 'direct' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900',
+                  ].join(' ')}
+                >
+                  직접 설정
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSettingsTab('favorite')}
+                  className={[
+                    'rounded px-4 py-2 text-sm font-semibold transition-colors',
+                    settingsTab === 'favorite' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900',
+                  ].join(' ')}
+                >
+                  즐겨찾기
+                </button>
+              </div>
 
-        <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <ResizeSettings
-            sourceImage={activeImage}
-            settings={settings}
-            onChange={handleSettingsChange}
-            onPreview={handlePreviewClick}
-            disabled={isProcessing}
-          />
+              <div className="mt-4">
+                {settingsTab === 'direct' ? (
+                  <ResizeSettings
+                    sourceImage={activeImage}
+                    settings={settings}
+                    onChange={handleSettingsChange}
+                    onPreview={handlePreviewClick}
+                    disabled={isProcessing}
+                  />
+                ) : (
+                  <Favorites
+                    favorites={favorites}
+                    settings={settings}
+                    disabled={isProcessing}
+                    onAdd={handleFavoriteAdd}
+                    onDelete={handleFavoriteDelete}
+                    onReorder={handleFavoriteReorder}
+                    onApply={handleFavoriteApply}
+                  />
+                )}
+              </div>
+            </section>
+          </div>
 
-          <div className="space-y-4">
+          <div className="min-h-0 overflow-hidden pr-1 lg:col-span-5">
             <Preview
               uploadedImages={uploadedImages}
               resultImages={resultImages}
@@ -516,8 +573,10 @@ export default function App() {
               onPrev={handlePrevImage}
               onNext={handleNextImage}
               onSelectIndex={setActiveImageIndex}
-              onPostProcessChange={handlePostProcessPreview}
             />
+          </div>
+
+          <div className="space-y-4 pr-1 lg:col-span-3">
             <Downloader
               imageData={activeResult}
               settings={appliedSettings ?? settings}
@@ -527,20 +586,9 @@ export default function App() {
               successfulResultCount={successfulResults.length}
               totalResultSize={totalResultSize}
               onDownload={handleDownload}
+              onPostProcessChange={handlePostProcessPreview}
             />
           </div>
-        </section>
-
-        <section>
-          <Favorites
-            favorites={favorites}
-            settings={settings}
-            disabled={isProcessing}
-            onAdd={handleFavoriteAdd}
-            onDelete={handleFavoriteDelete}
-            onReorder={handleFavoriteReorder}
-            onApply={handleFavoriteApply}
-          />
         </section>
       </main>
 
@@ -552,3 +600,4 @@ export default function App() {
     </div>
   );
 }
+

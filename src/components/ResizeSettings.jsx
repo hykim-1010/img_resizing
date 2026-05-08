@@ -104,10 +104,8 @@ export default function ResizeSettings({ sourceImage, settings, onChange, onPrev
       : String(settings.height);
 
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-      <h2 className="text-lg font-semibold text-gray-900">리사이즈 설정</h2>
-
-      <div className="mt-5 space-y-5">
+    <section className="space-y-4">
+      <div className="space-y-4">
         <div>
           <p className="mb-2 text-sm font-medium text-gray-700">모드</p>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
